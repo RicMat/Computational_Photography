@@ -3,7 +3,7 @@ import numpy as np
 import cv2
 
 
-folder = 'images'
+folder = 'Memorial'
 
 # We get all the image files from the source folder
 files = list([os.path.join(folder, f) for f in os.listdir(folder)])
