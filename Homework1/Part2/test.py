@@ -9,7 +9,7 @@ import cv2
 import numpy as np
 
 # Loading exposure images into a list
-img_fn = ["img01.jpg", "img02.jpg", "img03.jpg", "img04.jpg"]
+img_fn = ["test_image/img01.jpg", "test_image/img02.jpg", "test_image/img03.jpg", "test_image/img04.jpg"]
 img_list = [cv2.imread(fn) for fn in img_fn]
 exposure_times = np.array([15.0, 2.5, 0.25, 0.0333], dtype=np.float32)
 
