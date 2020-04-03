@@ -10,10 +10,10 @@ import cv2
 
 
 # Read all the files with OpenCV
-files = ['images/memorial00.png', 'images/memorial01.png', 'images/memorial02.png', 'images/memorial03.png',\
-         'images/memorial04.png', 'images/memorial05.png', 'images/memorial06.png', 'images/memorial07.png',\
-         'images/memorial08.png', 'images/memorial09.png', 'images/memorial10.png', 'images/memorial11.png',\
-         'images/memorial12.png', 'images/memorial13.png', 'images/memorial14.png', 'images/memorial15.png']
+files = ['Memorial/memorial00.png', 'Memorial/memorial01.png', 'Memorial/memorial02.png', 'Memorial/memorial03.png',\
+         'Memorial/memorial04.png', 'Memorial/memorial05.png', 'Memorial/memorial06.png', 'Memorial/memorial07.png',\
+         'Memorial/memorial08.png', 'Memorial/memorial09.png', 'Memorial/memorial10.png', 'Memorial/memorial11.png',\
+         'Memorial/memorial12.png', 'Memorial/memorial13.png', 'Memorial/memorial14.png', 'Memorial/memorial15.png']
 images = list([cv2.imread(f) for f in files])
 # Compute the exposure times in seconds
 exposures = np.float32([1. / t for t in [0.03125, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]])
