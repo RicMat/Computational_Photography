@@ -158,6 +158,7 @@ for channel in range(num_channels):
     
     
 
+
 # Global tone mapping
 image_mapped = globalToneMapping(hdr_image, gamma=0.6)
 
