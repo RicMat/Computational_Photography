@@ -158,6 +158,7 @@ for channel in range(num_channels):
     
     
 
+"""
 
 # Global tone mapping
 image_mapped = globalToneMapping(hdr_image, gamma=0.6)
@@ -170,3 +171,18 @@ image_tuned = intensityAdjustment(image_mapped, template)
 output = cv2.normalize(image_tuned, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
 cv2.imwrite('durand_image.png', output)
 
+    
+"""   
+template = images[len(images)//2]
+image_tuned = intensityAdjustment(hdr_image, template)
+
+durand = cv2.createTonemapDurand(gamma=0.6)
+ldr = durand.process(image_tuned)
+
+
+
+output = cv2.normalize(image_tuned, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
+cv2.imwrite('durand_image.png', output)
+
+
+#"""
