@@ -8,25 +8,27 @@ Created on Sun Apr  5 12:20:06 2020
 
 import numpy as np
 import cv2
-import random
 
 
-def create_hdr_image(l, a, dR, gamma, directory):
+def create_hdr_image(l):
     
-    images, exposures = read_images(directory)
+    images, exposures = read_images()
     ln_dt = np.log(exposures)
     
     z_red, z_green, z_blue = sample_rgb_images(images)
+    
+    weights = compute_weights()
     
     g_red = gsolve(z_red, ln_dt, l, weights);
     g_green = gsolve(z_green, ln_dt, l, weights);
     g_blue = gsolve(z_blue, ln_dt, l, weights);
     
-    hdr_map = compute_hdr_map(directory, images, g_red, g_green, g_blue, ln_dt);
+    hdr_map = compute_hdr_map(images, g_red, g_green, g_blue, weights, ln_dt);
+    
+    return hdr_map
     
     
-    
-def read_images(dir, ext):
+def read_images():
     
     files = ['images/memorial00.png', 'images/memorial01.png', 'images/memorial02.png', \
           'images/memorial07.png',\
@@ -43,16 +45,17 @@ def read_images(dir, ext):
 def sample_rgb_images(images):
     
     num_exposures = len(images)
-    num_samples = np.round(255 / (num_exposures - 1) * 2)
+    num_samples = np.rint(255 / (num_exposures - 1) * 2).astype(np.int)
     img_num_pixels = images[0].shape[0]* images[0].shape[1]
-    mid_img = images[num_exposures // 2] # used as reference
+    
+    #mid_img = images[num_exposures // 2] # used as reference
     
     step = img_num_pixels / num_samples
-    sample_indices = get_sample_index(step, mid_img)
+    sample_indices = get_sample_index(step, img_num_pixels)
     
-    z_red = np.zeros(num_samples, num_exposures)
-    z_green = np.zeros(num_samples, num_exposures)
-    z_blue = np.zeros(num_samples, num_exposures)
+    z_red = np.zeros((num_samples, num_exposures))
+    z_green = np.zeros((num_samples, num_exposures))
+    z_blue = np.zeros((num_samples, num_exposures))
     
     for i in range(num_exposures):
         sampled_red, sampled_green, sampled_blue = sample_exposure(images[i], sample_indices)
@@ -63,14 +66,19 @@ def sample_rgb_images(images):
     return z_red, z_green, z_blue
 
 
-def get_sample_index(step, reference): 
-    Z_min = 0
+def get_sample_index(step, img_pixels): 
+    
+    """ Z_min = 0
     Z_max = 255
     x1 = []
-    x2 = []
+    x2 = [] """
     
+    indexes = np.arange(1, img_pixels, step)
+    indexes = np.rint(indexes).astype(np.int)
+    
+    """
     for i in range(Z_min, Z_max + 1): 
-        rows, cols= np.where(reference == i)
+        rows, cols, ch= np.where(reference == i)
         if len(rows) != 0:
             idx = random.randrange(len(rows))
             # https://stackoverflow.com/questions/54930176/access-elements-of-a-matrix-by-a-list-of-indices-in-python-to-apply-a-maxval-0
@@ -79,26 +87,46 @@ def get_sample_index(step, reference):
             i += step
     
     indexes = [x1,x2]
-
+    """
     return indexes
 
 def sample_exposure(image, indexes):
     
-    indexes = indexes.transpose() # maybe indexes.conj()
+    #indexes = indexes.transpose() # maybe indexes.conj()
     
     red_img = image[..., 0]
     green_img = image[..., 1]
     blue_img = image[..., 2]
     
     # https://stackoverflow.com/questions/54930176/access-elements-of-a-matrix-by-a-list-of-indices-in-python-to-apply-a-maxval-0
+    red_img = red_img.flatten()
+    green_img = green_img.flatten()
+    blue_img = blue_img.flatten()
     
-    sampled_red = red_img[indexes[:,0],indexes[:,1]];
-    sampled_green = green_img[indexes[:,0],indexes[:,1]];
-    sampled_blue = blue_img[indexes[:,0],indexes[:,1]];
+    sampled_red = red_img[indexes]
+    sampled_green = green_img[indexes]
+    sampled_blue = blue_img[indexes]
     
+    """
+    sampled_red = red_img[indexes[:,0], indexes[:,1]]
+    sampled_green = green_img[indexes[:,0], indexes[:,1]]
+    sampled_blue = blue_img[indexes[:,0], indexes[:,1]]
+    
+    sampled_red = red_img[indexes]
+    sampled_green = green_img[indexes]
+    sampled_blue = blue_img[indexes]
+    """
     return sampled_red, sampled_green, sampled_blue
     
 
+def compute_weights():
+    
+    weights = np.arange(1, 256, dtype=np.int)
+    weights = np.minimum(weights, 256 - weights)
+    
+    return weights
+    
+    
 def weighting_function(z):
     
     Z_min = 0.
@@ -108,7 +136,13 @@ def weighting_function(z):
         return z - Z_min
     else:
         return Z_max - z
+    
 
+def weights_total(image, weights):
+    
+    return np.where(image > 128, 128 - (image - 128), image)
+    
+    
 
 def gsolve(images, exposures, l, weights): #review
     Z = images
@@ -127,7 +161,7 @@ def gsolve(images, exposures, l, weights): #review
     k = 0
     for i in range(Z.shape[0]):
         for j in range(Z.shape[1]):
-            zijp1 = Z[i, j] + 1
+            zijp1 = (Z[i, j] + 1).astype(int)
             wij = weighting_function(zijp1)
             A[k, zijp1] = wij # only integers as index
             A[k, n+i] = -wij # n+i+1
@@ -158,55 +192,51 @@ def gsolve(images, exposures, l, weights): #review
     return g[:, 0]
 
 
-def compute_hdr_map(directory, images, g_red, g_green, g_blue, weights, ln_dt):
+def compute_hdr_map(images, g_red, g_green, g_blue, weights, ln_dt):
     
     num_exposures = len(images)
     height, width, num_channels = images[0].shape
-    numerator = np.zeros(height, width, num_channels)
-    denominator = np.zeros(height, width, num_channels)
-    curr_num = np.zeros(height, width, num_channels)
+    numerator = np.zeros((height, width, num_channels))
+    denominator = np.zeros((height, width, num_channels))
+    curr_num = np.zeros((height, width, num_channels))
     
-    
-    
-    
-    
-    
-    
-    for i = 1 : num_exposures
-        % Grab the current image we are processing and split into channels.
-        curr_image = double(images{i}+1);     % Grab the current image.  Add 1 to get rid of zeros.
-        curr_red = curr_image(:,:,1);
-        curr_green = curr_image(:,:,2);
-        curr_blue = curr_image(:,:,3);
-
-        % Compute the numerator and denominator for this exposure.  Add to cumulative total.
-        %          sum_{j=1}^{P} (w(Z_ij)[g(Z_ij) - ln dt_j])
-        % ln E_i = ------------------------------------------
-        %                  sum_{j=1}^{P} (w(Z_ij))
-        curr_weight = weights(curr_image);
-        curr_num(:,:,1) = curr_weight(:,:,1) .* (g_red(curr_red) - ln_dt(i));
-        curr_num(:,:,2) = curr_weight(:,:,2) .* (g_green(curr_green) - ln_dt(i));
-        curr_num(:,:,3) = curr_weight(:,:,3) .* (g_blue(curr_blue) - ln_dt(i));
+    for i in range(num_exposures):
+        # Grab the current image we are processing and split into channels.
         
-        % Sum into the numerator and denominator.
-        numerator = numerator + curr_num;
-        denominator = denominator + curr_weight;
-    end
+        curr_image = images[i]   # Grab the current image.  Add 1 to get rid of zeros.
+        curr_red = curr_image[..., 0]
+        curr_green = curr_image[..., 1]
+        curr_blue = curr_image[..., 2]
 
-    ln_hdr_map = numerator ./ denominator;
-    hdr_map = exp(ln_hdr_map);
+        # Compute the numerator and denominator for this exposure.  Add to cumulative total.
+        #          sum_{j=1}^{P} (w(Z_ij)[g(Z_ij) - ln dt_j])
+        # ln E_i = ------------------------------------------
+        #                  sum_{j=1}^{P} (w(Z_ij))
+        
+        
+        curr_weight = weights_total(curr_image, weights)
+        
+        curr_num[..., 0] = curr_weight[..., 0] * (g_red[curr_red] - ln_dt[i])
+        curr_num[..., 1] = curr_weight[..., 1] * (g_green[curr_green] - ln_dt[i])
+        curr_num[..., 2] = curr_weight[..., 2] * (g_blue[curr_blue] - ln_dt[i])
+        
+        # Sum into the numerator and denominator.
+        numerator = numerator + curr_num
+        denominator = denominator + curr_weight
+
+    ln_hdr_map = numerator / denominator
+    hdr_map = np.exp(ln_hdr_map)
     
-    
+    return hdr_map
     
     
     
 
 if __name__ == "__main__":
     
-    directory = 'images';
-    hdr = create_hdr_image(50, 0.09, 5, 0.6, directory);
+    hdr = create_hdr_image(50)
     
-    durand = cv2.createTonemapDurand(gamma=0.6)
+    durand = cv2.createTonemapDurand(gamma=2.5)
     ldr = durand.process(hdr)
 
     cv2.imwrite('durand_image_cs194.png', ldr)
