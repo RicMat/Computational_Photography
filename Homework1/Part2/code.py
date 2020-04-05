@@ -98,7 +98,7 @@ def weighting_function(z):
     
 def merger(images, exposures, response): #2.2
     img_shape = images[0].shape
-    img_rad_map = np.zeros(img_shape, dtype=np.float64)
+    radiance_map = np.zeros(img_shape, dtype=np.float64)
     
     num_images = len(images)
     
@@ -106,19 +106,19 @@ def merger(images, exposures, response): #2.2
         for j in range(img_shape[1]):
             g = np.array([response[images[k][i, j]] for k in range(num_images)])
             w = np.array([weighting_function(images[k][i, j]) for k in range(num_images)])
-            SumW = np.sum(w)
-            if SumW > 0:
-                img_rad_map[i, j] = np.sum(w * (g - exposures) / SumW)
+            sum_w = np.sum(w)
+            if sum_w > 0:
+                radiance_map[i, j] = np.sum(w * (g - exposures) / sum_w)
             else:
-                img_rad_map[i, j] = g[num_images // 2] - exposures[num_images // 2]
-    return img_rad_map
+                radiance_map[i, j] = g[num_images // 2] - exposures[num_images // 2]
+    return radiance_map
 
-
+"""
 def globalToneMapping(image, gamma):
     
     image_corrected = cv2.pow(image/255., 1.0/gamma)
     return image_corrected
-
+"""
 
 def intensityAdjustment(image, template):
     
