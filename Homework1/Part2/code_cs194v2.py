@@ -285,8 +285,8 @@ if __name__ == "__main__":
     #new = img_as_ubyte(ldr)
     
     #cv2.imwrite(im2uint8(linear_result), ['output/', directory, '_linear_hdr.jpg'], 'jpg')
-    asdf = np.zeros(shape=hdr.shape, dtype=hdr.dtype)
-    cv2.normalize(hdr, asdf, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
+    #asdf = np.zeros(shape=hdr.shape, dtype=hdr.dtype)
+    #cv2.normalize(hdr, asdf, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
     #print(asdf)
     cv2.imwrite('durand_image_cs194.jpg', hdr)
     
