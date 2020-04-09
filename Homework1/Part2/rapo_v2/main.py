@@ -27,6 +27,10 @@ OUT_FOLDER = "images/outputs"
 
 EXTENSIONS = set(["bmp", "jpeg", "jpg", "png", "tif", "tiff"])
 
+def lin2srgb(x):
+    a = 0.055
+    return np.where(x <= 0.0031308, x * 12.92, (1 + a) * np.power(x, 1 / 2.4) - a)
+    
 def countTonemap(hdr_image, min_fraction=0.0005):
     counts, ranges = np.histogram(hdr_image, 256)
     min_count = min_fraction * hdr_image.size
@@ -74,16 +78,19 @@ def computeHDR(images, log_exposure_times, smoothing_lambda=100.):
         # tone mapping function MUST appear in your report to receive
         # credit.
         out = np.zeros(shape=img_rad_map.shape, dtype=img_rad_map.dtype)
-        cv2.normalize(img_rad_map, out, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
-        hdr_image[..., channel] = img_rad_map  
+        cv2.normalize(np.exp(img_rad_map), out, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
+        hdr_image[..., channel] = out  
     
     
-    
+    #cv2.imwrite('boya_hdr.hdr', hdr_image)
+    #cv2.imwrite('boya_hdr_255.hdr', hdr_image * 255)
+    #out = np.zeros(shape=hdr_image.shape, dtype=hdr_image.dtype)
+    #cv2.normalize(hdr_image, out, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
     
     print("hdr pre tonemap")
-    print(hdr_image[:,:,0])
+    #print(hdr_image[:,:,0])
     
-    out = countTonemap(hdr_image)
+    #out = countTonemap(hdr_image)
     
     """
     out = np.zeros(shape=img_rad_map.shape, dtype=img_rad_map.dtype)
@@ -107,9 +114,9 @@ def computeHDR(images, log_exposure_times, smoothing_lambda=100.):
     #hdr_image = out
     
     print("ldr after tonemap")
-    print(out[..., 0])
+    #print(out[..., 0])
         
-    return out
+    return hdr_image
 
 
 def main(image_files, output_folder, exposure_times, resize=False):
@@ -148,8 +155,9 @@ if __name__ == "__main__":
     dirpath, _, fnames = next(src_contents)
 
     image_dir = os.path.split(dirpath)[-1]
-    output_dir = os.path.join(OUT_FOLDER, image_dir)
-
+    print(image_dir)
+    output_dir = OUT_FOLDER
+    print(output_dir)
     try:
         os.makedirs(output_dir)
     except OSError as exception:
