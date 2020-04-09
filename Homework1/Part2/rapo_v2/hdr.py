@@ -1,7 +1,5 @@
 import numpy as np
 import scipy as sp
-import cv2
-import random
 
 
 def linearWeight(pixel_value):
@@ -98,10 +96,10 @@ def computeRadianceMap(images, log_exposure_times, response_curve, weighting_fun
                 g[k] = response_curve[images[k][i,j]]
                 w[k] = weighting_function(images[k][i,j])
             SumW = np.sum(w)
-            if SumW>0:
-                img_rad_map[i,j] = np.sum(w*(g-log_exposure_times)/SumW)
-            else:
-                img_rad_map[i,j] = g[len(images)//2] - log_exposure_times[len(images)//2]
+            #if SumW>0:
+            img_rad_map[i,j] = np.sum(w*(g-log_exposure_times)/SumW)
+            #else:
+                #img_rad_map[i,j] = g[len(images)//2] - log_exposure_times[len(images)//2]
     return img_rad_map
 
 if __name__ == '__main__':
