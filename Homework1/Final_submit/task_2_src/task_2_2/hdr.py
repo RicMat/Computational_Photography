@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Apr  5 16:58:15 2020
+
+@authors: M. Riccardo - E-A. Bunchalit
+"""
+
 import numpy as np
 
 
