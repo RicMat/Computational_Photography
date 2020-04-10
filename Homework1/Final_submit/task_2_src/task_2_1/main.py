@@ -2,14 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Apr  7 19:16:19 2020
-
 @authors: M. Riccardo - E-A. Bunchalit
-"""
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Apr  2 12:43:22 2020
-
-@author: darim
 """
 
 import numpy as np
@@ -43,3 +36,18 @@ ldr = durand.process(hdr)
 # This is why we multiply the image with 255 before saving
 
 cv2.imwrite('durand_image.png', ldr * 255)
+
+#Drago
+tonemapDrago = cv2.createTonemapDrago(1.0, 0.7)
+ldrDrago = tonemapDrago.process(hdr)
+ldrDrago = 3 * ldrDrago
+cv2.imwrite("ldr-Drago.jpg", ldrDrago * 255)
+
+
+
+
+
+
+
+
+
