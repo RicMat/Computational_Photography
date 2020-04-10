@@ -51,7 +51,7 @@ def compute_hdr(images, log_exposures, llambda=100.):
         out = np.zeros(shape=hdr_map.shape, dtype=hdr_map.dtype)
         out_01 = np.zeros(shape=hdr_map_01.shape, dtype=hdr_map_01.dtype)
         
-        # normalize to get png
+        # normalize for output
         cv2.normalize(hdr_map, out, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
         cv2.normalize(hdr_map_01, out_01, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
         
