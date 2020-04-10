@@ -30,18 +30,18 @@ hdr = merge.process(images, exposures, response)
 cv2.imwrite('hdr22_image.hdr', hdr)
 
 durand = cv2.createTonemapDurand(gamma=2.5)
-ldr = durand.process(hdr)
+ldr_durand = durand.process(hdr)
 
 # Tonemap operators create floating point images with values in the 0..1 range
 # This is why we multiply the image with 255 before saving
 
-cv2.imwrite('durand_image.png', ldr * 255)
+cv2.imwrite('durand_image.png', ldr_durand * 255)
 
 #Drago
-tonemapDrago = cv2.createTonemapDrago(1.0, 0.7)
-ldrDrago = tonemapDrago.process(hdr)
-ldrDrago = 3 * ldrDrago
-cv2.imwrite("ldr-Drago.jpg", ldrDrago * 255)
+drago = cv2.createTonemapDrago(1.0, 0.7)
+ldr_drago = drago.process(hdr)
+ldr_drago = 3 * ldr_drago
+cv2.imwrite("drago_image.jpg", ldr_drago * 255)
 
 
 
