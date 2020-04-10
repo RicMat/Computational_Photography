@@ -3,7 +3,7 @@
 """
 Created on Tue Apr  7 19:16:19 2020
 
-@author: ebunchalit
+@authors: M. Riccardo - E-A. Bunchalit
 """
 # -*- coding: utf-8 -*-
 """
@@ -43,12 +43,3 @@ ldr = durand.process(hdr)
 # This is why we multiply the image with 255 before saving
 
 cv2.imwrite('durand_image.png', ldr * 255)
-
-
-
-
-
-
-
-
-
