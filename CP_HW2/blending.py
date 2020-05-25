@@ -74,6 +74,7 @@ class Image_Stitching():
         return cv2.merge([mask, mask, mask])
 
     def blending(self,img1,img2):
+		#path = "/Users/darim/Desktop/"
         path = "/Users/ebunchalit/Documents/proj2f/ployy/"
         H , masks= self.registration(img1,img2)
         height_img1 = img1.shape[0]
@@ -213,24 +214,18 @@ class Image_Stitching():
 middle=Image_Stitching().blending(img1,img2)
 cv2.imwrite(path+ 'alpha.jpeg',middle)
 
-
-# =============================================================================
 #for 3 images
 # midimg = cv2.imread(path +'alpha.jpeg')
 # final = Image_Stitching().blending(midimg,img3)
 # cv2.imwrite(path+ 'panorama_alpha.jpeg', final)
-# =============================================================================
-
 
 #Laplace blending
 middle_lpb = Image_Stitching().laplace(img1,img2)
 cv2.imwrite(path+ 'laplace.jpeg', middle_lpb)
 
-# =============================================================================
 # midimg_lpb = cv2.imread(path+ 'middle_lpb.jpeg')
 # final_lpb = Image_Stitching().laplace(midimg_lpb,img3)
 # cv2.imwrite(path+ 'panorama_lpb.jpeg', final_lpb)
-# =============================================================================
 
 
 path = "/Users/ebunchalit/Documents/CP_HW2/linearpic/"
