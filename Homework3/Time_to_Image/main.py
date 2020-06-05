@@ -17,20 +17,24 @@ import yfinance as yf
 import pandas as pd
 from pandas import DataFrame
 
-# create a random sequence with 200 numbers
-# all numbers are in the range of 50.0 to 150.0
-#random_series = np.random.uniform(low=50.0, high=150.0, size=(200,))
+
+from sklearn.preprocessing import normalize
+
 stocks = ["MSFT"]
 start = dt.datetime.today()-dt.timedelta(360)
 end = dt.datetime.today()
 cl_price: DataFrame = pd.DataFrame() # empty dataframe which will be filled with closing prices of each stock
 
-cl_price[ticker] = yf.download(ticker,start,end)["Adj Close"]
-clprice_v = cl_price.values
-clp = clprice_v.reshape((clprice_v.shape[0],))
+cl_price["MSFT"] = yf.download("MSFT",start,end)["Adj Close"]
+cl_price = cl_price.values
+
+clp = cl_price.reshape((cl_price.shape[0],))
+clp_n = normalize(clp[:,np.newaxis], axis=0).ravel()
+
+
 
 # set parameters
-timeSeries = list(clp)
+timeSeries = list(clp_n)
 windowSize = 50
 rollingLength = 10
 #fileName = 'demo_%02d_%02d'%(windowSize, rollingLength)
@@ -47,7 +51,7 @@ from series2gaf import PlotHeatmap
 gaf = np.load('msft_test_gaf.pkl',allow_pickle=True)
 
 x = PlotHeatmap(gaf)
-plt.plot(clp)
+plt.plot(clp_n)
 plt.ylabel('MSFT price')
 
 
